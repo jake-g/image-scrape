@@ -67,46 +67,43 @@ var download = function(url, dest, cb) {
 		.pipe(fs.createWriteStream(dest));
 };
 
+var getResults = function(res, settings) { // links returned
+	res.forEach(function(r, i) {
+		console.log(settings.keyword, i + 1, '\n', r);
+		getImage(r, settings.path); // get em
+	});
+};
 ///////////////////////////////////////////////////////
 
 exports.yahoo = function (settings, cb) {
 	createSaveDir(settings.path);
 	yahoo.list(settings)
-	.then(function(res) { // links returned
-		res.forEach(function(r, i) {
-			console.log(settings.keyword, i+1, '\n', r);
-			getImage(r, settings.path); // get em
-		});
-		cb(null, true);
-	}).catch(function(err) {
+	.then(function(res){
+		getResults(res, settings);
+	})
+	.catch(function(err) {
 		cb(err);
 	});
-}
+};
 
 exports.picsearch = function (settings, cb) {
-	createSaveDir(settings.path)
+	createSaveDir(settings.path);
 	yahoo.list(settings)
-	.then(function(res) { // links returned
-		res.forEach(function(r, i) {
-			console.log(settings.keyword, i+1, '\n', r);
-			getImage(r, settings.path); // get em
-		});
-		cb(null, true);
-	}).catch(function(err) {
+	.then(function(res){
+		getResults(res, settings);
+	})
+	.catch(function(err) {
 		cb(err);
 	});
-}
+};
 
 exports.bing = function(settings, cb) {
 	createSaveDir(settings.path);
 	bing.list(settings)
-		.then(function(res) { // links returned
-			res.forEach(function(r, i) {
-				console.log(settings.keyword, i + 1, '\n', r);
-				getImage(r, settings.path); // get em
-			});
-			cb(null, true);
-		}).catch(function(err) {
+		.then(function(res){
+			getResults(res, settings);
+		})
+		.catch(function(err) {
 			cb(err);
 		});
 };
@@ -114,13 +111,10 @@ exports.bing = function(settings, cb) {
 exports.google = function(settings, cb) {
 	createSaveDir(settings.path);
 	google.list(settings)
-		.then(function(res) { // links returned
-			res.forEach(function(r, i) {
-				console.log(settings.keyword, i + 1, '\n', r);
-				getImage(r, settings.path); // get em
-			});
-			cb(null, true);
-		}).catch(function(err) {
-			cb(err);
-		});
+	.then(function(res){
+		getResults(res, settings);
+	})
+	.catch(function(err) {
+		cb(err);
+	});
 };
