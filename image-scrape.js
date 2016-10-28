@@ -1,29 +1,26 @@
 var scraper = require('images-scraper'),
 	fs = require('fs'),
 	request = require('request-promise'),
-  imageType = require('image-type'),
+	imageType = require('image-type'),
+	bing = new scraper.Bing(),
+	yahoo = new scraper.Yahoo(),
+	picsearch = new scraper.Picsearch(),
 	google = new scraper.Google();
 
-var settings = {
-		keyword: '',
-    path: 'dogs/',
-		num: 10,
-    rlimit: 10,	// requests p second
-		nightmare: {  // browser
-			show: false
-		},
-		advanced: {
-			imgType: 'photo', // options: clipart, face, lineart, news, photo
-			//resolution: 'l', // options: l(arge), m(edium), i(cons), etc.
-			//color: undefined // options: color, gray, trans
-		}
-	};
+
+function createSaveDir(path) {
+	// Create save folder
+	if (!fs.existsSync(path)) {
+		console.log(path, 'not found...creating');
+		fs.mkdirSync(path);
+	}
+}
 
 function getFilename(url) {
-  function looksLegit(f) { // checks valid ext (could still be corrupt)
-    var ext = f.split('.').pop();
-    return ['jpg', 'jpeg', 'png', 'bmp'].indexOf(ext) > -1;
-  }
+	function looksLegit(f) { // checks valid ext (could still be corrupt)
+		var ext = f.split('.').pop();
+		return ['jpg', 'jpeg', 'png', 'bmp'].indexOf(ext) > -1;
+	}
 
 	var name = url.split('/').pop();
 	if (!looksLegit(name)) {
@@ -32,30 +29,25 @@ function getFilename(url) {
 	return name;
 }
 
-var getImage = function(r) {
-	var file = settings.path + getFilename(r.url);
+var getImage = function(r, path) {
+	var file = path + getFilename(r.url);
 	download(r.url, file, function(err, success) {
 		if (err) {
 			console.log('Error in file', file);
-      var file = settings.path + getFilename(r.thumb_url);
-      console.log('Attempting thumbnail', file);
+			var file = path + getFilename(r.thumb_url);
+			console.log('Attempting thumbnail', file);
 			download(r.thumb_url, file, function(err, success) {
-			  if (err) {
-          return err;
-			  }
+				if (err) {
+					return err;
+				}
 			});
 		}
+
 	});
 	console.log('Saved:', file + '\n');
 	return file;
 };
 
-// request.get(url, function (res) {
-//   res.once('data', function (chunk) {
-//       res.destroy();
-//       console.log(imageType(chunk));
-//       //=> {ext: 'gif', mime: 'image/gif'}
-//   });
 
 var download = function(url, dest, cb) {
 	request.get(url)
@@ -63,28 +55,67 @@ var download = function(url, dest, cb) {
 			console.log(err);
 			cb(err.message); // dipset
 		})
+		// .on('data', function (chunk) {
+		//     console.log(imageType(chunk));
+		//     //=> {ext: 'gif', mime: 'image/gif'}
+		// })
 		.pipe(fs.createWriteStream(dest));
 };
 
+///////////////////////////////////////////////////////
 
-settings.keyword = 'Dog';
-settings.num = 300;
-
-// Script
-console.log('Start:', new Date().toUTCString());
-console.log(settings);
-if (!fs.existsSync(settings.path)){
-    console.log(settings.path, 'not found...creating');
-    fs.mkdirSync(settings.path);
-}
-
-google.list(settings)
+exports.yahoo = function (settings, cb) {
+	createSaveDir(settings.path)
+	yahoo.list(settings)
 	.then(function(res) { // links returned
 		res.forEach(function(r, i) {
 			console.log(settings.keyword, i+1, '\n', r);
-			getImage(r); // get em
+			getImage(r, settings.path); // get em
 		});
-    console.log('Finished:', new Date().toUTCString());
+		cb(null, true);
 	}).catch(function(err) {
-		console.log('err in scraper', err);
+		cb(err);
 	});
+}
+
+exports.picsearch = function (settings, cb) {
+	createSaveDir(settings.path)
+	yahoo.list(settings)
+	.then(function(res) { // links returned
+		res.forEach(function(r, i) {
+			console.log(settings.keyword, i+1, '\n', r);
+			getImage(r, settings.path); // get em
+		});
+		cb(null, true);
+	}).catch(function(err) {
+		cb(err);
+	});
+}
+
+exports.bing = function(settings, cb) {
+	createSaveDir(settings.path);
+	bing.list(settings)
+		.then(function(res) { // links returned
+			res.forEach(function(r, i) {
+				console.log(settings.keyword, i + 1, '\n', r);
+				getImage(r, settings.path); // get em
+			});
+			cb(null, true);
+		}).catch(function(err) {
+			cb(err);
+		});
+};
+
+exports.google = function(settings, cb) {
+	createSaveDir(settings.path);
+	google.list(settings)
+		.then(function(res) { // links returned
+			res.forEach(function(r, i) {
+				console.log(settings.keyword, i + 1, '\n', r);
+				getImage(r, settings.path); // get em
+			});
+			cb(null, true);
+		}).catch(function(err) {
+			cb(err);
+		});
+};
