@@ -1,5 +1,6 @@
 var scraper = require('images-scraper'),
 	fs = require('fs'),
+   _ = require('lodash'),
 	request = require('request-promise'),
 	imageType = require('image-type'),
 	bing = new scraper.Bing(),
@@ -70,21 +71,32 @@ var download = function(url, dest, cb) {
 var getResults = function(res, settings) { // links returned
 	res.forEach(function(r, i) {
 		console.log(settings.keyword, i + 1, '\n', r);
-		getImage(r, settings.path); // get em
+		// getImage(r, settings.path); // get em
 	});
 };
 ///////////////////////////////////////////////////////
 exports.all = function(settings, cb) {
   Promise.all([
-      bing.list(settings),
-      yahoo.list(settings),
-      // picsearch.list(settings),
+      // bing.list(settings),
+      // yahoo.list(settings), // same as bing
+      picsearch.list(settings),
       // google.list(settings)
     ]).then(function(res) {
-      console.log(res.length);
+      var merged = [].concat.apply([], res);
+      var unique = _.uniq(merged, function(x){
+          return x.url;
+      });
+      console.log(merged.length);
+      console.log(unique.length);
+
+      // console.log(res.length);
+      // console.log(unq.length);
+
+
     });
 };
 
+// TODO seems the same as bing!
 exports.yahoo = function(settings, cb) {
 	createSaveDir(settings.path);
 	yahoo.list(settings)

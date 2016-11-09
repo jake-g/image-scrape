@@ -3,7 +3,7 @@ var scraper = require('./image-scrape.js');
 var settings = {
 		keyword: 'dog',
     path: '/Users/jake/Desktop/dogs/',
-		num: 100,
+		num: 70,
     detail: true,
 		nightmare: {  // browser
 			show: false
@@ -27,8 +27,8 @@ var settings = {
 //   }
 // });
 //
-// // Scrape bing
-// // console.log('\nscraping bing...');
+// Scrape bing
+// console.log('\nscraping bing...');
 // scraper.bing(settings, function(err, res) {
 //   if (err) {
 //     console.log('err in bing', err);
