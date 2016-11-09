@@ -1,12 +1,28 @@
 var scraper = require('images-scraper'),
 	fs = require('fs'),
-   _ = require('lodash'),
+	_ = require('lodash'),
 	request = require('request-promise'),
 	imageType = require('image-type'),
 	bing = new scraper.Bing(),
 	yahoo = new scraper.Yahoo(),
 	picsearch = new scraper.Picsearch(),
 	google = new scraper.Google();
+
+
+var settings = {
+	keyword: '',
+	path: '',
+	num: 10,
+	detail: true,
+	nightmare: { // browser
+		show: false
+	},
+	advanced: {
+		imgType: 'photo', // options: clipart, face, lineart, news, photo
+		//resolution: 'l', // options: l(arge), m(edium), i(cons), etc.
+		//color: undefined // options: color, gray, trans
+	}
+};
 
 
 function createSaveDir(path) {
@@ -28,31 +44,33 @@ function getFilename(url) {
 			name = name + '.jpg'; // hack to fix
 		}
 		return name;
-	} catch(err) {
+	} catch (err) {
 		console.log(err);
-		return undefined
+		return undefined;
 	}
 }
 
-var getImage = function(r, path) {
-	var file = path + getFilename(r.url);
-	download(r.url, file, function(err) {
-		if (err) {
-			var file = path + getFilename(r.thumb_url);
-			console.log('Attempting thumbnail', file);
-			download(r.thumb_url, file, function(err) {
-				if (err) return err;
-			});
-		}
+var save = function(res) {
+	res.map(function(img) {
+		var file = settings.path + getFilename(img.url);
+		download(img.url, file, function(err) {
+			if (err) {
+				var file = settings.path + getFilename(img.thumb_url);
+				console.log('Attempting thumbnail', file);
+				download(img.thumb_url, file, function(err) {
+					if (err) return err;
+				});
+			}
+		});
+		console.log('Saved:', file + '\n');
+		return file;
 	});
-	console.log('Saved:', file + '\n');
-	return file;
 };
 
 
 var download = function(url, dest, cb) {
 	if (typeof dest === undefined || typeof url === undefined) {
-		var err = new Error('link undefined')
+		var err = new Error('link undefined');
 		console.log(err);
 		cb(err);
 	}
@@ -68,75 +86,14 @@ var download = function(url, dest, cb) {
 		.pipe(fs.createWriteStream(dest));
 };
 
-var getResults = function(res, settings) { // links returned
-	res.forEach(function(r, i) {
-		console.log(settings.keyword, i + 1, '\n', r);
-		// getImage(r, settings.path); // get em
-	});
-};
-///////////////////////////////////////////////////////
-exports.all = function(settings, cb) {
-  Promise.all([
-      // bing.list(settings),
-      // yahoo.list(settings), // same as bing
-      picsearch.list(settings),
-      // google.list(settings)
-    ]).then(function(res) {
-      var merged = [].concat.apply([], res);
-      var unique = _.uniq(merged, function(x){
-          return x.url;
-      });
-      console.log(merged.length);
-      console.log(unique.length);
 
-      // console.log(res.length);
-      // console.log(unq.length);
+// TODO EXPORT function for each independent source
 
-
-    });
-};
-
-// TODO seems the same as bing!
-exports.yahoo = function(settings, cb) {
+exports.all = function(args, cb) {
+	settings = _.merge(settings, args);
 	createSaveDir(settings.path);
-	yahoo.list(settings)
-	.then(function(res){
-		getResults(res, settings);
-	})
-	.catch(function(err) {
-		cb(err);
-	});
-};
-
-exports.picsearch = function (settings, cb) {
-	createSaveDir(settings.path);
-	picsearch.list(settings)
-	.then(function(res){
-		getResults(res, settings);
-	})
-	.catch(function(err) {
-		cb(err);
-	});
-};
-
-exports.bing = function(settings, cb) {
-	createSaveDir(settings.path);
-	bing.list(settings)
-		.then(function(res){
-			getResults(res, settings);
-		})
-		.catch(function(err) {
-			cb(err);
-		});
-};
-
-exports.google = function(settings, cb) {
-	createSaveDir(settings.path);
-	google.list(settings)
-	.then(function(res){
-		getResults(res, settings);
-	})
-	.catch(function(err) {
-		cb(err);
-	});
+	bing.list(settings).then(save);
+	google.list(settings).then(save);
+	picsearch.list(settings).then(save);
+	return;
 };
