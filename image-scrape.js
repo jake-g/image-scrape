@@ -74,8 +74,18 @@ var getResults = function(res, settings) { // links returned
 	});
 };
 ///////////////////////////////////////////////////////
+exports.all = function(settings, cb) {
+  Promise.all([
+      bing.list(settings),
+      yahoo.list(settings),
+      // picsearch.list(settings),
+      // google.list(settings)
+    ]).then(function(res) {
+      console.log(res.length);
+    });
+};
 
-exports.yahoo = function (settings, cb) {
+exports.yahoo = function(settings, cb) {
 	createSaveDir(settings.path);
 	yahoo.list(settings)
 	.then(function(res){
@@ -88,7 +98,7 @@ exports.yahoo = function (settings, cb) {
 
 exports.picsearch = function (settings, cb) {
 	createSaveDir(settings.path);
-	yahoo.list(settings)
+	picsearch.list(settings)
 	.then(function(res){
 		getResults(res, settings);
 	})
