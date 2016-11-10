@@ -3,8 +3,8 @@ var scraper = require('./lib/scraper.js');
 var settings = {
 		keyword: 'dog',
     path: '/Users/jake/Desktop/tst/',
-		num: 100,
-		source: 'bing'
+		num: 10,
+		source: ''
 	};
 
 
