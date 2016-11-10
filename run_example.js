@@ -2,13 +2,13 @@ var scraper = require('./image-scrape.js');
 
 var settings = {
 		keyword: 'dog',
-    path: '/Users/jake/Desktop/dogs/',
-		num: 10,
+    path: '/Users/jake/Desktop/tst/',
+		num: 100,
+		source: 'bing'
 	};
 
 
-
-scraper.all(settings, function(err, res) {
+scraper.scrape(settings, function(err, res) {
   if (err) {
     console.log('err', err);
   }
