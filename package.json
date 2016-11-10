@@ -1,8 +1,12 @@
 {
   "name": "image-scrape",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
-  "main": "image-scrape.js",
+  "author": "jake",
+  "license": "ISC",
+  "bin": {
+    "image-scrape": "image-scrape.js"
+  },
   "dependencies": {
     "image-type": "^2.1.0",
     "images-scraper": "^2.0.10",
@@ -13,7 +17,5 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "jake",
-  "license": "ISC"
+  }
 }

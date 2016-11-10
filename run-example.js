@@ -1,4 +1,4 @@
-var scraper = require('./image-scrape.js');
+var scraper = require('./lib/scraper.js');
 
 var settings = {
 		keyword: 'dog',
