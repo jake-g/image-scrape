@@ -13,7 +13,10 @@ if (args.length < 2) {
 
 settings.keyword = args[0];
 settings.num = args[1];
-settings.path = args[2] ? args[2] : __dirname + '/' + args[0] + '/';
+settings.path = args[2] ? args[2] : __dirname + '/' + args[0];
+if (settings.path.slice(-1) !== '/') {
+  settings.path += '/';
+}
 
 scraper.scrape(settings, function(err, res) {
     if (err) {
